@@ -1,0 +1,21 @@
+path /questions {
+  read() { true }
+  write() { false }
+}
+
+path /users/{userid} {
+  read() { isCurrentUser(userid) }
+  write() { isCurrentUser(userid) }
+}
+
+path /answers/{userid} {
+  read() { true }
+  write() { isCurrentUser(userid) }
+}
+
+path /answers {
+  read() { true }
+  write() { true }
+}
+
+isCurrentUser(uid) { auth != null && auth.uid == uid }

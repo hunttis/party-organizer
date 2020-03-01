@@ -1,0 +1,44 @@
+{
+  "name": "party-organizer",
+  "version": "1.0.0",
+  "description": "Arrange a party, ask about food allergies and such",
+  "main": "index.js",
+  "author": "Hunttis",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "NODE_ENV=development parcel serve ./src/index.html",
+    "nuke": "rm -rf node_modules; rm -rf dist; rm -rf .parcel-cache; rm -rf deploy; yarn; yarn dev",
+    "build": "PARCEL_WORKERS=1 parcel build ./src/index.html -o index.html -d deploy --public-url . --no-source-maps --detailed-report",
+    "bolt": "firebase-bolt < firebase-rules/firebase-rules.bolt > firebase-rules/rules.json",
+    "deploy": "yarn build; yarn bolt; firebase deploy"
+  },
+  "dependencies": {
+    "bulma": "^0.8.0",
+    "firebase": "^7.9.3",
+    "lodash": "^4.17.15",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "react-redux": "^7.2.0",
+    "react-redux-firebase": "^3.1.2",
+    "react-redux-form": "^1.16.14",
+    "redux": "^4.0.5",
+    "redux-thunk": "^2.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0-0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.8.3",
+    "@babel/preset-env": "^7.8.6",
+    "@babel/preset-flow": "^7.8.3",
+    "@babel/preset-react": "^7.8.3",
+    "@types/lodash": "^4.14.149",
+    "@types/react": "^16.9.23",
+    "@types/react-dom": "^16.9.5",
+    "@types/react-redux": "^7.1.7",
+    "firebase-bolt": "^0.8.4",
+    "parcel": "^2.0.0-alpha.3.2",
+    "redux-devtools-extension": "^2.13.8",
+    "typescript": "^3.8.3"
+  }
+}
