@@ -1,9 +1,13 @@
-import React, { Fragment, Component } from 'react';
+import React from 'react';
 import {Question} from '../../models/Models';
 import firebase from 'firebase/app';
 import _ from 'lodash';
 import 'firebase/auth';
 import 'firebase/database';
+
+interface Props {
+  userId: string;
+}
 
 interface State {
   data: {[key: string]: Question};
@@ -17,8 +21,8 @@ export class Questions extends React.Component<any, Partial<State>> {
     this.state = {};
   }
 
-  updateStateWithData(data: firebase.database.DataSnapshot) {
-    console.log('UPDATED STATE WITH', data.val())
+  updateStateWithData(data: firebase.database.DataSnapshot, command: string) {
+    console.log(command, '-> Questions ->', data.key, ':', data.val())
     if (data.key) {
       const newData = this.state.data || {};
       const key: string = data.key;
@@ -27,8 +31,8 @@ export class Questions extends React.Component<any, Partial<State>> {
     }
   }
 
-  updateAnswersStateWithData(data: firebase.database.DataSnapshot) {
-    console.log('UPDATED STATE WITH', data.val())
+  updateAnswersStateWithData(data: firebase.database.DataSnapshot, command: string) {
+    console.log(command, '-> Answers ->', data.key, ':', data.val())
     if (data.key) {
       const newData = this.state.answers || {};
       const key: string = data.key;
@@ -39,16 +43,14 @@ export class Questions extends React.Component<any, Partial<State>> {
 
   componentDidMount() {
     const questionsRef = firebase.database().ref('questions');
-    questionsRef.on('child_added', (data) => this.updateStateWithData(data), this.handleError);
-    questionsRef.on('child_changed', (data) => this.updateStateWithData(data), this.handleError);
-    questionsRef.on('child_removed', (data) => this.updateStateWithData(data), this.handleError);
+    questionsRef.on('child_added', (data) => this.updateStateWithData(data, 'ADD'), this.handleError);
+    questionsRef.on('child_changed', (data) => this.updateStateWithData(data, 'CHANGE'), this.handleError);
+    questionsRef.on('child_removed', (data) => this.updateStateWithData(data, 'REMOVE'), this.handleError);
 
-    const fakeUserId = 'FAKEUSER';
-    const answersRef = firebase.database().ref(`answers/${fakeUserId}`);
-    answersRef.on('child_added', (data) => this.updateAnswersStateWithData(data), this.handleError);
-    answersRef.on('child_changed', (data) => this.updateAnswersStateWithData(data), this.handleError);
-
-    console.log('Supposedly initialized');
+    const answersRef = firebase.database().ref(`answers/${this.props.userId}`);
+    answersRef.on('child_added', (data) => this.updateAnswersStateWithData(data, 'ADD'), this.handleError);
+    answersRef.on('child_changed', (data) => this.updateAnswersStateWithData(data, 'CHANGE'), this.handleError);
+    answersRef.on('child_removed', (data) => this.updateAnswersStateWithData(data, 'REMOVE'), this.handleError);
   }
 
   storeAnswer(userId: string, questionId: string, answerId: string): void {
@@ -63,23 +65,19 @@ export class Questions extends React.Component<any, Partial<State>> {
   }
 
   render() {
-    if (!this.state.data) {
+    const { data, answers } = this.state;
+
+    if (!data) {
       return <div className="section">Loading</div>;
     }
 
-    const { data, answers } = this.state;
-    const fakeUserId = 'FAKEUSER';
-    const answersRef = firebase.database().ref(`answers/${fakeUserId}`);
-
-    console.log('ANSWERS', answers)
-
     return (
       <div className="section">
-        <h1 className="title">Questions</h1>
+        <h2 className="subtitle">Questions</h2>
         {Object.keys(data).map((key, index) => 
           <SingleQuestion 
             key={`question-${index}`} 
-            userId={fakeUserId} 
+            userId={this.props.userId} 
             questionId={key} 
             questionData={data[key]} 
             storeAnswerCallback={this.storeAnswer}
